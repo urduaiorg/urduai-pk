@@ -135,6 +135,8 @@
             <small>Check browser console for more details.</small>
             <div>
                 <button id="test-api-btn" class="btn btn-sm">Test API Connection</button>
+                <button id="test-config-btn" class="btn btn-sm">Test Config</button>
+                <button id="test-fetch-btn" class="btn btn-sm">Test Direct Fetch</button>
             </div>
         </div>
         
@@ -311,20 +313,124 @@
                 
                 // Test the OpenAI API connection
                 const response = await fetch('/api/test-openai');
-                const data = await response.json();
                 
-                console.log('API test response:', data);
+                // Log the raw response for debugging
+                console.log('Raw API test response:', response);
+                
+                const data = await response.json();
+                console.log('API test response data:', data);
                 
                 if (data.status === 'ok') {
                     document.getElementById('error-message').textContent = 'API connection successful! ' + data.message;
                     document.getElementById('error-container').style.backgroundColor = '#e8f5e9';
                     document.getElementById('error-container').style.borderColor = '#66bb6a';
+                    
+                    // Add success message to chat
+                    addMessage('error', 'API test successful: ' + data.response);
                 } else {
                     document.getElementById('error-message').textContent = 'API test failed: ' + (data.error || 'Unknown error');
+                    document.getElementById('error-container').style.backgroundColor = '#ffebee';
+                    document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                    
+                    // Add error message to chat
+                    addMessage('error', 'API test failed: ' + (data.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error testing API:', error);
                 document.getElementById('error-message').textContent = 'Error testing API: ' + error.message;
+                document.getElementById('error-container').style.backgroundColor = '#ffebee';
+                document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                
+                // Add error message to chat
+                addMessage('error', 'Error testing API: ' + error.message);
+            }
+        }
+        
+        // Function to test API configuration
+        async function testApiConfig() {
+            try {
+                document.getElementById('error-message').textContent = 'Testing API configuration...';
+                document.getElementById('error-container').style.display = 'block';
+                
+                // Test the API configuration
+                const response = await fetch('/api/test');
+                
+                // Log the raw response for debugging
+                console.log('Raw config test response:', response);
+                
+                const data = await response.json();
+                console.log('Config test response data:', data);
+                
+                const configMessage = `
+                    API Key: ${data.apiKey}
+                    OpenAI Configured: ${data.openaiConfigured}
+                    Environment: ${data.environment}
+                `;
+                
+                document.getElementById('error-message').textContent = 'Config: ' + configMessage.replace(/\n/g, ' ');
+                
+                if (data.apiKey === 'Configured' && data.openaiConfigured) {
+                    document.getElementById('error-container').style.backgroundColor = '#e8f5e9';
+                    document.getElementById('error-container').style.borderColor = '#66bb6a';
+                    
+                    // Add success message to chat
+                    addMessage('error', 'Config test: API key is configured');
+                } else {
+                    document.getElementById('error-container').style.backgroundColor = '#ffebee';
+                    document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                    
+                    // Add error message to chat
+                    addMessage('error', 'Config test: API key is missing or not configured');
+                }
+            } catch (error) {
+                console.error('Error testing config:', error);
+                document.getElementById('error-message').textContent = 'Error testing config: ' + error.message;
+                document.getElementById('error-container').style.backgroundColor = '#ffebee';
+                document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                
+                // Add error message to chat
+                addMessage('error', 'Error testing config: ' + error.message);
+            }
+        }
+        
+        // Function to test direct fetch
+        async function testDirectFetch() {
+            try {
+                document.getElementById('error-message').textContent = 'Testing direct fetch to OpenAI...';
+                document.getElementById('error-container').style.display = 'block';
+                
+                // Test the direct fetch to OpenAI
+                const response = await fetch('/api/test-openai-fetch');
+                
+                // Log the raw response for debugging
+                console.log('Raw direct fetch response:', response);
+                
+                const data = await response.json();
+                console.log('Direct fetch response data:', data);
+                
+                if (data.status === 'ok') {
+                    document.getElementById('error-message').textContent = 'Direct fetch successful! ' + data.message;
+                    document.getElementById('error-container').style.backgroundColor = '#e8f5e9';
+                    document.getElementById('error-container').style.borderColor = '#66bb6a';
+                    
+                    // Add success message to chat
+                    addMessage('error', 'Direct fetch successful: ' + data.response);
+                } else {
+                    document.getElementById('error-message').textContent = 'Direct fetch failed: ' + (data.error || 'Unknown error');
+                    document.getElementById('error-container').style.backgroundColor = '#ffebee';
+                    document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                    
+                    // Add error message to chat
+                    addMessage('error', 'Direct fetch failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error testing direct fetch:', error);
+                document.getElementById('error-message').textContent = 'Error testing direct fetch: ' + error.message;
+                document.getElementById('error-container').style.backgroundColor = '#ffebee';
+                document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                
+                // Add error message to chat
+                addMessage('error', 'Error testing direct fetch: ' + error.message);
             }
         }
         
@@ -345,6 +451,12 @@
             
             // Add event listener for test API button
             document.getElementById('test-api-btn').addEventListener('click', testApiConnection);
+            
+            // Add event listener for test config button
+            document.getElementById('test-config-btn').addEventListener('click', testApiConfig);
+            
+            // Add event listener for test direct fetch button
+            document.getElementById('test-fetch-btn').addEventListener('click', testDirectFetch);
         });
     </script>
 </body>

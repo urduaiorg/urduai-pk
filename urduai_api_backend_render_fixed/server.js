@@ -120,6 +120,71 @@ app.get('/api/test-openai', async (req, res) => {
   }
 });
 
+// Test OpenAI API key directly using fetch
+app.get('/api/test-openai-fetch', async (req, res) => {
+  try {
+    const apiKey = process.env.OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      return res.status(503).json({ 
+        error: 'OpenAI API key is missing in environment variables',
+        code: 'missing_api_key'
+      });
+    }
+    
+    console.log('Testing OpenAI API with direct fetch...');
+    
+    // Prepare the request to OpenAI API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: "Hello, this is a direct fetch test." }],
+        max_tokens: 10
+      })
+    });
+    
+    // Get the response data
+    const data = await response.json();
+    
+    // Check if the response is successful
+    if (!response.ok) {
+      console.error('OpenAI API direct fetch error:', data);
+      
+      return res.status(response.status).json({
+        status: 'error',
+        message: 'OpenAI API direct fetch test failed',
+        error: data.error?.message || 'Unknown error',
+        code: data.error?.type || 'unknown',
+        statusCode: response.status,
+        details: data
+      });
+    }
+    
+    // Return the successful response
+    res.status(200).json({
+      status: 'ok',
+      message: 'OpenAI API direct fetch test successful',
+      response: data.choices[0].message.content,
+      details: data
+    });
+  } catch (error) {
+    console.error('OpenAI API Direct Fetch Test Error:', error);
+    
+    res.status(500).json({
+      status: 'error',
+      message: 'OpenAI API direct fetch test failed',
+      error: error.message || 'Unknown error',
+      code: 'fetch_error',
+      details: JSON.stringify(error, Object.getOwnPropertyNames(error))
+    });
+  }
+});
+
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
   try {

@@ -43,7 +43,12 @@
     <button id="test-config">Test API Configuration</button>
     <div id="config-result" class="result">Results will appear here...</div>
     
-    <h2>2. Test Chat API</h2>
+    <h2>2. Test OpenAI API Connection</h2>
+    <button id="test-openai">Test OpenAI API Connection</button>
+    <button id="test-openai-fetch">Test Direct Fetch</button>
+    <div id="openai-result" class="result">Results will appear here...</div>
+    
+    <h2>3. Test Chat API</h2>
     <textarea id="chat-message" placeholder="Enter a message to test...">Hello, how are you?</textarea>
     <div>
         <button id="test-chat-en">Test Chat (English)</button>
@@ -65,6 +70,77 @@
             } catch (error) {
                 resultDiv.textContent = `Error: ${error.message}`;
                 console.error('Error testing configuration:', error);
+            }
+        });
+        
+        document.getElementById('test-openai').addEventListener('click', async function() {
+            const resultDiv = document.getElementById('openai-result');
+            resultDiv.textContent = 'Testing OpenAI API connection...';
+            
+            try {
+                const origin = window.location.origin;
+                const response = await fetch(`${origin}/api/test-openai`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(e => ({ error: 'Unknown error' }));
+                    throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<strong>Status:</strong> ${data.status}<br>
+                    <strong>Message:</strong> ${data.message}<br>
+                    <strong>Response:</strong> ${data.response || 'None'}<br><br>
+                    <strong>Full data:</strong><br>${JSON.stringify(data, null, 2)}`;
+                
+                if (data.status === 'ok') {
+                    resultDiv.style.backgroundColor = '#e8f5e9';
+                } else {
+                    resultDiv.style.backgroundColor = '#ffebee';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<strong style="color: red;">Error:</strong> ${error.message}<br><br>
+                    <small>Check browser console for more details (F12 > Console)</small>`;
+                resultDiv.style.backgroundColor = '#ffebee';
+                console.error('Error testing OpenAI API:', error);
+            }
+        });
+        
+        document.getElementById('test-openai-fetch').addEventListener('click', async function() {
+            const resultDiv = document.getElementById('openai-result');
+            resultDiv.textContent = 'Testing OpenAI API with direct fetch...';
+            
+            try {
+                const origin = window.location.origin;
+                const response = await fetch(`${origin}/api/test-openai-fetch`);
+                
+                // Log the raw response for debugging
+                console.log('Raw direct fetch test response:', response);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(e => ({ error: 'Unknown error' }));
+                    console.error('Direct fetch error data:', errorData);
+                    
+                    throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
+                }
+                
+                const data = await response.json();
+                console.log('Direct fetch test data:', data);
+                
+                resultDiv.innerHTML = `<strong>Status:</strong> ${data.status}<br>
+                    <strong>Message:</strong> ${data.message}<br>
+                    <strong>Response:</strong> ${data.response || 'None'}<br><br>
+                    <strong>Full data:</strong><br>${JSON.stringify(data, null, 2)}`;
+                
+                if (data.status === 'ok') {
+                    resultDiv.style.backgroundColor = '#e8f5e9';
+                } else {
+                    resultDiv.style.backgroundColor = '#ffebee';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<strong style="color: red;">Error:</strong> ${error.message}<br><br>
+                    <small>Check browser console for more details (F12 > Console)</small>`;
+                resultDiv.style.backgroundColor = '#ffebee';
+                console.error('Error testing direct fetch:', error);
             }
         });
         
