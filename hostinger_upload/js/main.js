@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', function() {
         ? '' // Empty for local development
         : 'https://urduai-pk.onrender.com'; // Updated to the new Render.com deployment URL
     
+    // For debugging - log the API URL
+    console.log('API Base URL:', API_BASE_URL);
+    
     // Remove page loader after everything is loaded
     window.addEventListener('load', function() {
         setTimeout(() => {
