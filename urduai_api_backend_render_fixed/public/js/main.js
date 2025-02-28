@@ -246,7 +246,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
             
-            const response = await fetch('/api/chat', {
+            // Get the current origin
+            const origin = window.location.origin;
+            
+            const response = await fetch(`${origin}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -545,8 +548,11 @@ document.addEventListener('DOMContentLoaded', function() {
             submitButton.disabled = true;
             
             try {
+                // Get the current origin
+                const origin = window.location.origin;
+                
                 // Send data to our server endpoint
-                const response = await fetch('/api/newsletter/subscribe', {
+                const response = await fetch(`${origin}/api/newsletter/subscribe`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
