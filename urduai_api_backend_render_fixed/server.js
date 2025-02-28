@@ -73,69 +73,138 @@ app.get('/api/test', (req, res) => {
   });
 });
 
+// Test OpenAI API key directly
+app.get('/api/test-openai', async (req, res) => {
+  try {
+    if (!openai) {
+      return res.status(503).json({ 
+        error: 'OpenAI client is not initialized. API key may be missing.' 
+      });
+    }
+    
+    // Try a simple completion to test the API key
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: "Hello, this is a test." }],
+      max_tokens: 10
+    });
+    
+    res.status(200).json({
+      status: 'ok',
+      message: 'OpenAI API key is valid',
+      response: completion.choices[0].message.content
+    });
+  } catch (error) {
+    console.error('OpenAI API Test Error:', error);
+    
+    let errorMessage = 'Unknown error';
+    let errorCode = 'unknown';
+    
+    if (error.status === 401) {
+      errorMessage = 'Invalid API key or authentication error';
+      errorCode = 'auth_error';
+    } else if (error.status === 429) {
+      errorMessage = 'Rate limit exceeded or quota reached';
+      errorCode = 'rate_limit';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    res.status(500).json({
+      status: 'error',
+      message: 'OpenAI API key test failed',
+      error: errorMessage,
+      code: errorCode,
+      details: JSON.stringify(error)
+    });
+  }
+});
+
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
   try {
-    // Check if OpenAI client is initialized
+    console.log('Received chat request:', JSON.stringify({
+      messages: req.body.messages ? `${req.body.messages.length} messages` : 'none',
+      language: req.body.language
+    }));
+    
     if (!openai) {
       console.error('OpenAI client is not initialized. API key may be missing.');
       return res.status(503).json({ 
-        error: 'OpenAI service unavailable. Please check server configuration.' 
+        error: 'OpenAI service unavailable. API key may be missing.',
+        code: 'openai_not_initialized'
       });
     }
 
-    console.log('Received request body:', JSON.stringify(req.body));
     const { messages, language } = req.body;
-    
-    // Check if messages is valid
-    if (!messages || !Array.isArray(messages)) {
-      console.error('Invalid messages format:', messages);
-      return res.status(400).json({ error: 'Invalid messages format. Expected an array.' });
-    }
-    
-    // Set system message based on language
-    const systemMessage = language === 'ur' 
-      ? "آپ ایک مددگار اور دوستانہ اے آئی اسسٹنٹ ہیں جو اردو میں بات کرتا ہے۔ آپ کا نام اُردو اے آئی ہے۔"
-      : "You are a helpful and friendly AI assistant that speaks English. Your name is Urdu AI.";
-    
-    // Prepare messages array with system message first
-    const apiMessages = [
-      { role: "system", content: systemMessage },
-      ...messages
-    ];
-    
-    console.log('Sending to OpenAI:', JSON.stringify(apiMessages));
-    
-    try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: apiMessages,
-        temperature: 0.7,
-        max_tokens: 1000,
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      console.error('Invalid messages format:', req.body.messages);
+      return res.status(400).json({ 
+        error: 'Invalid messages format', 
+        code: 'invalid_messages'
       });
-      
-      console.log('Received response from OpenAI');
-      
-      res.json({ 
-        reply: completion.choices[0].message.content,
-        usage: completion.usage
-      });
-    } catch (openaiError) {
-      console.error('OpenAI API Error:', openaiError);
-      console.error('OpenAI API Error Details:', JSON.stringify(openaiError, null, 2));
-      
-      // Check for specific OpenAI error types
-      if (openaiError.status === 401) {
-        return res.status(500).json({ error: 'Invalid API key or authentication error' });
-      } else if (openaiError.status === 429) {
-        return res.status(500).json({ error: 'Rate limit exceeded or quota reached' });
-      } else {
-        return res.status(500).json({ error: `OpenAI API error: ${openaiError.message}` });
-      }
     }
+
+    // Format messages for OpenAI
+    const formattedMessages = messages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+
+    console.log('Sending to OpenAI:', JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: `${formattedMessages.length} messages`,
+      temperature: 0.7,
+      max_tokens: 1000
+    }));
+
+    // Call OpenAI API
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: formattedMessages,
+      temperature: 0.7,
+      max_tokens: 1000
+    });
+
+    console.log('Received response from OpenAI');
+    
+    // Extract the response
+    const responseMessage = completion.choices[0].message.content;
+    
+    // Send response back to client
+    res.json({
+      message: responseMessage,
+      language
+    });
   } catch (error) {
-    console.error('Error calling OpenAI:', error);
-    res.status(500).json({ error: 'Failed to get response from AI' });
+    console.error('Error in chat endpoint:', error);
+    
+    let errorMessage = 'An error occurred while processing your request.';
+    let errorCode = 'unknown_error';
+    let statusCode = 500;
+    
+    if (error.status === 401) {
+      errorMessage = 'Authentication error with OpenAI API.';
+      errorCode = 'auth_error';
+    } else if (error.status === 429) {
+      errorMessage = 'Rate limit exceeded or quota reached on OpenAI API.';
+      errorCode = 'rate_limit';
+    } else if (error.status === 400) {
+      errorMessage = 'Bad request to OpenAI API.';
+      errorCode = 'bad_request';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    console.error(`Chat error details: ${errorCode} - ${errorMessage}`);
+    console.error('Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    
+    res.status(statusCode).json({
+      error: errorMessage,
+      code: errorCode,
+      details: process.env.NODE_ENV === 'development' ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : undefined
+    });
   }
 });
 
