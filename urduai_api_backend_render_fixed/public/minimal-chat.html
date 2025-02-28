@@ -121,6 +121,36 @@
         .error-message strong {
             color: #b71c1c;
         }
+        
+        /* Add styles for diagnostic panel */
+        .diagnostic-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .diagnostic-panel h3 {
+            margin-top: 0;
+            color: #4a148c;
+        }
+        
+        .diagnostic-buttons {
+            margin-bottom: 15px;
+        }
+        
+        .result {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -133,11 +163,6 @@
         <div id="error-container" class="error-message" style="display: none;">
             <strong>Error:</strong> <span id="error-message"></span>
             <small>Check browser console for more details.</small>
-            <div>
-                <button id="test-api-btn" class="btn btn-sm">Test API Connection</button>
-                <button id="test-config-btn" class="btn btn-sm">Test Config</button>
-                <button id="test-fetch-btn" class="btn btn-sm">Test Direct Fetch</button>
-            </div>
         </div>
         
         <div class="chat-container">
@@ -151,6 +176,17 @@
                 <input type="text" id="message-input" placeholder="Type your message...">
                 <button id="send-button" class="btn">Send</button>
             </div>
+        </div>
+        
+        <!-- Add diagnostic panel that's always visible -->
+        <div class="diagnostic-panel">
+            <h3>Diagnostic Tools</h3>
+            <div class="diagnostic-buttons">
+                <button id="test-api-btn" class="btn btn-sm">Test API Connection</button>
+                <button id="test-config-btn" class="btn btn-sm">Test Config</button>
+                <button id="test-fetch-btn" class="btn btn-sm">Test Direct Fetch</button>
+            </div>
+            <div id="diagnostic-result" class="result">Run a test to see results here</div>
         </div>
     </div>
     
@@ -308,8 +344,7 @@
         // Function to test API connection
         async function testApiConnection() {
             try {
-                document.getElementById('error-message').textContent = 'Testing API connection...';
-                document.getElementById('error-container').style.display = 'block';
+                document.getElementById('diagnostic-result').textContent = 'Testing API connection...';
                 
                 // Test the OpenAI API connection
                 const response = await fetch('/api/test-openai');
@@ -321,25 +356,25 @@
                 console.log('API test response data:', data);
                 
                 if (data.status === 'ok') {
-                    document.getElementById('error-message').textContent = 'API connection successful! ' + data.message;
-                    document.getElementById('error-container').style.backgroundColor = '#e8f5e9';
-                    document.getElementById('error-container').style.borderColor = '#66bb6a';
+                    document.getElementById('diagnostic-result').textContent = 'API connection successful! ' + data.message + '\n\nResponse: ' + data.response;
+                    document.getElementById('diagnostic-result').style.backgroundColor = '#e8f5e9';
+                    document.getElementById('diagnostic-result').style.borderColor = '#66bb6a';
                     
                     // Add success message to chat
                     addMessage('error', 'API test successful: ' + data.response);
                 } else {
-                    document.getElementById('error-message').textContent = 'API test failed: ' + (data.error || 'Unknown error');
-                    document.getElementById('error-container').style.backgroundColor = '#ffebee';
-                    document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                    document.getElementById('diagnostic-result').textContent = 'API test failed: ' + (data.error || 'Unknown error') + '\n\nDetails: ' + JSON.stringify(data, null, 2);
+                    document.getElementById('diagnostic-result').style.backgroundColor = '#ffebee';
+                    document.getElementById('diagnostic-result').style.borderColor = '#ef9a9a';
                     
                     // Add error message to chat
                     addMessage('error', 'API test failed: ' + (data.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error testing API:', error);
-                document.getElementById('error-message').textContent = 'Error testing API: ' + error.message;
-                document.getElementById('error-container').style.backgroundColor = '#ffebee';
-                document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                document.getElementById('diagnostic-result').textContent = 'Error testing API: ' + error.message + '\n\nStack: ' + error.stack;
+                document.getElementById('diagnostic-result').style.backgroundColor = '#ffebee';
+                document.getElementById('diagnostic-result').style.borderColor = '#ef9a9a';
                 
                 // Add error message to chat
                 addMessage('error', 'Error testing API: ' + error.message);
@@ -349,8 +384,7 @@
         // Function to test API configuration
         async function testApiConfig() {
             try {
-                document.getElementById('error-message').textContent = 'Testing API configuration...';
-                document.getElementById('error-container').style.display = 'block';
+                document.getElementById('diagnostic-result').textContent = 'Testing API configuration...';
                 
                 // Test the API configuration
                 const response = await fetch('/api/test');
@@ -362,31 +396,31 @@
                 console.log('Config test response data:', data);
                 
                 const configMessage = `
-                    API Key: ${data.apiKey}
-                    OpenAI Configured: ${data.openaiConfigured}
-                    Environment: ${data.environment}
+API Key: ${data.apiKey}
+OpenAI Configured: ${data.openaiConfigured}
+Environment: ${data.environment}
                 `;
                 
-                document.getElementById('error-message').textContent = 'Config: ' + configMessage.replace(/\n/g, ' ');
+                document.getElementById('diagnostic-result').textContent = configMessage;
                 
                 if (data.apiKey === 'Configured' && data.openaiConfigured) {
-                    document.getElementById('error-container').style.backgroundColor = '#e8f5e9';
-                    document.getElementById('error-container').style.borderColor = '#66bb6a';
+                    document.getElementById('diagnostic-result').style.backgroundColor = '#e8f5e9';
+                    document.getElementById('diagnostic-result').style.borderColor = '#66bb6a';
                     
                     // Add success message to chat
                     addMessage('error', 'Config test: API key is configured');
                 } else {
-                    document.getElementById('error-container').style.backgroundColor = '#ffebee';
-                    document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                    document.getElementById('diagnostic-result').style.backgroundColor = '#ffebee';
+                    document.getElementById('diagnostic-result').style.borderColor = '#ef9a9a';
                     
                     // Add error message to chat
                     addMessage('error', 'Config test: API key is missing or not configured');
                 }
             } catch (error) {
                 console.error('Error testing config:', error);
-                document.getElementById('error-message').textContent = 'Error testing config: ' + error.message;
-                document.getElementById('error-container').style.backgroundColor = '#ffebee';
-                document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                document.getElementById('diagnostic-result').textContent = 'Error testing config: ' + error.message + '\n\nStack: ' + error.stack;
+                document.getElementById('diagnostic-result').style.backgroundColor = '#ffebee';
+                document.getElementById('diagnostic-result').style.borderColor = '#ef9a9a';
                 
                 // Add error message to chat
                 addMessage('error', 'Error testing config: ' + error.message);
@@ -396,8 +430,7 @@
         // Function to test direct fetch
         async function testDirectFetch() {
             try {
-                document.getElementById('error-message').textContent = 'Testing direct fetch to OpenAI...';
-                document.getElementById('error-container').style.display = 'block';
+                document.getElementById('diagnostic-result').textContent = 'Testing direct fetch to OpenAI...';
                 
                 // Test the direct fetch to OpenAI
                 const response = await fetch('/api/test-openai-fetch');
@@ -409,25 +442,25 @@
                 console.log('Direct fetch response data:', data);
                 
                 if (data.status === 'ok') {
-                    document.getElementById('error-message').textContent = 'Direct fetch successful! ' + data.message;
-                    document.getElementById('error-container').style.backgroundColor = '#e8f5e9';
-                    document.getElementById('error-container').style.borderColor = '#66bb6a';
+                    document.getElementById('diagnostic-result').textContent = 'Direct fetch successful! ' + data.message + '\n\nResponse: ' + data.response + '\n\nDetails: ' + JSON.stringify(data, null, 2);
+                    document.getElementById('diagnostic-result').style.backgroundColor = '#e8f5e9';
+                    document.getElementById('diagnostic-result').style.borderColor = '#66bb6a';
                     
                     // Add success message to chat
                     addMessage('error', 'Direct fetch successful: ' + data.response);
                 } else {
-                    document.getElementById('error-message').textContent = 'Direct fetch failed: ' + (data.error || 'Unknown error');
-                    document.getElementById('error-container').style.backgroundColor = '#ffebee';
-                    document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                    document.getElementById('diagnostic-result').textContent = 'Direct fetch failed: ' + (data.error || 'Unknown error') + '\n\nDetails: ' + JSON.stringify(data, null, 2);
+                    document.getElementById('diagnostic-result').style.backgroundColor = '#ffebee';
+                    document.getElementById('diagnostic-result').style.borderColor = '#ef9a9a';
                     
                     // Add error message to chat
                     addMessage('error', 'Direct fetch failed: ' + (data.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error testing direct fetch:', error);
-                document.getElementById('error-message').textContent = 'Error testing direct fetch: ' + error.message;
-                document.getElementById('error-container').style.backgroundColor = '#ffebee';
-                document.getElementById('error-container').style.borderColor = '#ef9a9a';
+                document.getElementById('diagnostic-result').textContent = 'Error testing direct fetch: ' + error.message + '\n\nStack: ' + error.stack;
+                document.getElementById('diagnostic-result').style.backgroundColor = '#ffebee';
+                document.getElementById('diagnostic-result').style.borderColor = '#ef9a9a';
                 
                 // Add error message to chat
                 addMessage('error', 'Error testing direct fetch: ' + error.message);
