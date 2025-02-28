@@ -368,8 +368,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="message-content error-content">
                     <p>${message}</p>
+                    <small>${currentLanguage === 'ur' ? 'مزید تفصیلات کے لیے براؤزر کنسول چیک کریں۔' : 'Check browser console for more details.'}</small>
                 </div>
             `;
+            messageDiv.classList.add('error-message');
         }
         
         messageDiv.innerHTML = messageContent;

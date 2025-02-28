@@ -1974,14 +1974,44 @@ body:not(.sidebar-collapsed) .show-sidebar-btn {
 
 /* Error Message Styling */
 .error-message {
-    background-color: rgba(255, 0, 0, 0.05);
-    border-left: 3px solid var(--color-danger);
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    border-left: 4px solid #f44336;
+}
+
+.error-message small {
+    color: #ef5350;
+    display: block;
+    margin-top: 0.5rem;
+}
+
+.error-message strong {
+    color: #b71c1c;
+}
+
+.message.error-message {
+    background-color: #ffebee;
+    margin-right: auto;
+    border-left: 4px solid #f44336;
+    color: #c62828;
 }
 
 .error-content {
-    color: var(--color-danger);
+    color: #c62828;
 }
 
 .dark-mode .error-content {
     color: #ff6b6b;
+}
+
+.dark-mode .error-message {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-left: 4px solid #f44336;
+}
+
+.dark-mode .message.error-message {
+    background-color: rgba(244, 67, 54, 0.1);
 } 
