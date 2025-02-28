@@ -216,13 +216,25 @@
             document.getElementById('typing-indicator').style.display = 'block';
             
             try {
-                // Prepare messages for API
-                const messages = conversation.map(msg => ({
-                    role: msg.role,
-                    content: msg.content
-                }));
+                // Set system message based on language
+                const systemMessage = currentLanguage === 'ur' 
+                    ? "آپ ایک مددگار اور دوستانہ اے آئی اسسٹنٹ ہیں جو اردو میں بات کرتا ہے۔ آپ کا نام اُردو اے آئی ہے۔"
+                    : "You are a helpful and friendly AI assistant that speaks English. Your name is Urdu AI.";
                 
-                console.log('Sending to API:', { messages, language: currentLanguage });
+                // Prepare messages for API with system message first
+                const apiMessages = [
+                    { role: "system", content: systemMessage },
+                    ...conversation.map(msg => ({
+                        role: msg.role,
+                        content: msg.content
+                    }))
+                ];
+                
+                console.log('Sending to API:', { 
+                    messages: apiMessages, 
+                    language: currentLanguage,
+                    messageCount: apiMessages.length
+                });
                 
                 // Call API
                 const response = await fetch('/api/chat', {
@@ -231,7 +243,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        messages,
+                        messages: apiMessages,
                         language: currentLanguage
                     })
                 });

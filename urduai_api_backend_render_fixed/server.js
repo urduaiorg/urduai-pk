@@ -146,15 +146,25 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    // Format messages for OpenAI
-    const formattedMessages = messages.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
+    // Check if the first message is a system message
+    let apiMessages = [...messages];
+    const hasSystemMessage = messages.length > 0 && messages[0].role === 'system';
+    
+    // If no system message, add one based on language
+    if (!hasSystemMessage) {
+      const systemMessage = language === 'ur' 
+        ? "آپ ایک مددگار اور دوستانہ اے آئی اسسٹنٹ ہیں جو اردو میں بات کرتا ہے۔ آپ کا نام اُردو اے آئی ہے۔"
+        : "You are a helpful and friendly AI assistant that speaks English. Your name is Urdu AI.";
+      
+      apiMessages = [
+        { role: "system", content: systemMessage },
+        ...messages
+      ];
+    }
 
     console.log('Sending to OpenAI:', JSON.stringify({
       model: "gpt-3.5-turbo",
-      messages: `${formattedMessages.length} messages`,
+      messages: `${apiMessages.length} messages`,
       temperature: 0.7,
       max_tokens: 1000
     }));
@@ -162,7 +172,7 @@ app.post('/api/chat', async (req, res) => {
     // Call OpenAI API
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: formattedMessages,
+      messages: apiMessages,
       temperature: 0.7,
       max_tokens: 1000
     });
@@ -172,10 +182,12 @@ app.post('/api/chat', async (req, res) => {
     // Extract the response
     const responseMessage = completion.choices[0].message.content;
     
-    // Send response back to client
+    // Send response back to client - support both old and new response formats
     res.json({
       message: responseMessage,
-      language
+      reply: responseMessage, // For backward compatibility
+      language,
+      usage: completion.usage // For backward compatibility
     });
   } catch (error) {
     console.error('Error in chat endpoint:', error);

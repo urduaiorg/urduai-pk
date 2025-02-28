@@ -89,8 +89,17 @@
             
             try {
                 const origin = window.location.origin;
+                
+                // Set system message based on language
+                const systemMessage = language === 'ur' 
+                    ? "آپ ایک مددگار اور دوستانہ اے آئی اسسٹنٹ ہیں جو اردو میں بات کرتا ہے۔ آپ کا نام اُردو اے آئی ہے۔"
+                    : "You are a helpful and friendly AI assistant that speaks English. Your name is Urdu AI.";
+                
                 const requestData = {
-                    messages: [{ role: "user", content: message }],
+                    messages: [
+                        { role: "system", content: systemMessage },
+                        { role: "user", content: message }
+                    ],
                     language: language
                 };
                 
@@ -105,15 +114,24 @@
                 });
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Server error: ${errorData.error || response.statusText}`);
+                    console.error('Server error response:', response);
+                    const errorData = await response.json().catch(e => ({ error: 'Unknown error' }));
+                    console.error('Error data:', errorData);
+                    
+                    throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
                 }
                 
                 const data = await response.json();
-                resultDiv.textContent = `Response: ${data.reply}\n\nFull data: ${JSON.stringify(data, null, 2)}`;
+                const reply = data.message || data.reply || 'No response received';
+                resultDiv.textContent = `Response: ${reply}\n\nFull data: ${JSON.stringify(data, null, 2)}`;
             } catch (error) {
-                resultDiv.textContent = `Error: ${error.message}`;
-                console.error('Error testing chat:', error);
+                console.error('Detailed error:', error);
+                if (error.stack) {
+                    console.error('Error stack:', error.stack);
+                }
+                
+                resultDiv.innerHTML = `<strong style="color: red;">Error:</strong> ${error.message}\n\n` +
+                    `<small>Check browser console for more details (F12 > Console)</small>`;
             }
         }
     </script>
