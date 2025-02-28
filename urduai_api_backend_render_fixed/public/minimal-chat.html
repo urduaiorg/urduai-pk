@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UrduAI Minimal Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .chat-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .ai-message {
+            background-color: #f1f1f1;
+            align-self: flex-start;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            padding: 10px 15px;
+            background-color: #4a6da7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            width: fit-content;
+        }
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #888;
+            margin-right: 3px;
+            animation: wave 1.3s linear infinite;
+        }
+        .dot:nth-child(2) {
+            animation-delay: -1.1s;
+        }
+        .dot:nth-child(3) {
+            animation-delay: -0.9s;
+        }
+        @keyframes wave {
+            0%, 60%, 100% {
+                transform: initial;
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .language-toggle {
+            margin-bottom: 15px;
+        }
+        .language-toggle button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .language-toggle button.active {
+            background-color: #4a6da7;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>UrduAI Minimal Chat</h1>
+    
+    <div class="language-toggle">
+        <button class="lang-btn active" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="ur">اردو</button>
+    </div>
+    
+    <div class="error-message" id="error-message"></div>
+    
+    <div class="chat-container">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="typing-indicator" id="typing-indicator">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Type your message here...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        // DOM elements
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const errorMessage = document.getElementById('error-message');
+        const languageButtons = document.querySelectorAll('.lang-btn');
+        
+        // Variables
+        let currentLanguage = 'en';
+        let isProcessing = false;
+        let conversationHistory = [];
+        
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Language toggle
+        languageButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                languageButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                currentLanguage = this.getAttribute('data-lang');
+                
+                // Update placeholder based on language
+                messageInput.placeholder = currentLanguage === 'ur' ? 
+                    '...اپنا پیغام یہاں لکھیں' : 
+                    'Type your message here...';
+            });
+        });
+        
+        // Send message function
+        async function sendMessage() {
+            if (isProcessing) {
+                return;
+            }
+            
+            const message = messageInput.value.trim();
+            if (!message) {
+                return;
+            }
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Add to conversation history
+            conversationHistory.push({ role: "user", content: message });
+            
+            // Show typing indicator
+            isProcessing = true;
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            try {
+                // Hide any previous error
+                errorMessage.style.display = 'none';
+                
+                // Get the current origin
+                const origin = window.location.origin;
+                
+                // Prepare request data
+                const requestData = {
+                    messages: conversationHistory,
+                    language: currentLanguage
+                };
+                
+                console.log('Sending request:', JSON.stringify(requestData));
+                
+                // Send request to API
+                const response = await fetch(`${origin}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                // Check for errors
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Server error');
+                }
+                
+                // Process response
+                const data = await response.json();
+                console.log('Received response:', data);
+                
+                // Add AI message to chat
+                addMessage(data.reply, 'ai');
+                
+                // Add to conversation history
+                conversationHistory.push({ role: "assistant", content: data.reply });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Show error message
+                errorMessage.textContent = error.message || 'Something went wrong. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
+                isProcessing = false;
+            }
+        }
+        
+        // Add message to chat
+        function addMessage(content, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(sender + '-message');
+            messageElement.textContent = content;
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html> 
