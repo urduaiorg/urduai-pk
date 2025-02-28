@@ -27,6 +27,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static('public'));
 
+// Set trust proxy to true for proper rate limiting behind a proxy (like Render)
+app.set('trust proxy', 1);
+
 // Add a route handler for the root path
 app.get('/', (req, res) => {
   res.sendFile('index.html', { root: 'public' });
@@ -47,9 +50,20 @@ app.use('/api/', apiLimiter);
 // Configure OpenAI with fallback for missing API key
 let openai;
 try {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-  });
+  const apiKey = process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    console.error('⚠️ CRITICAL ERROR: OPENAI_API_KEY is missing in environment variables');
+    console.error('The OpenAI API will not function without a valid API key');
+    console.error('Please add your API key to the Render environment variables');
+    console.error('Instructions: Go to Render Dashboard > Your Service > Environment > Add Environment Variable');
+    console.error('Set OPENAI_API_KEY to your OpenAI API key from https://platform.openai.com/api-keys');
+  } else {
+    console.log('✅ OpenAI API key found in environment variables');
+    openai = new OpenAI({
+      apiKey: apiKey
+    });
+  }
 } catch (error) {
   console.error('Failed to initialize OpenAI client:', error);
 }
@@ -61,14 +75,17 @@ app.get('/health', (req, res) => {
 
 // Test endpoint to check OpenAI configuration
 app.get('/api/test', (req, res) => {
+  const apiKey = process.env.OPENAI_API_KEY;
   const openaiConfigured = !!openai;
-  const apiKey = process.env.OPENAI_API_KEY ? 'Configured' : 'Missing';
+  const apiKeyStatus = apiKey ? 'Configured' : 'Missing';
+  
+  console.log(`API Test: API Key ${apiKeyStatus}, OpenAI Client ${openaiConfigured ? 'Initialized' : 'Not Initialized'}`);
   
   res.status(200).json({
-    status: 'ok',
-    message: 'Test endpoint',
+    status: apiKey ? 'ok' : 'error',
+    message: apiKey ? 'API configuration test' : 'API key is missing',
     openaiConfigured,
-    apiKey: apiKey,
+    apiKey: apiKeyStatus,
     environment: process.env.NODE_ENV || 'development'
   });
 });
