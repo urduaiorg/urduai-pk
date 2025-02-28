@@ -19,7 +19,11 @@ if (missingEnvVars.length > 0) {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST'], // Allow only GET and POST requests
+  allowedHeaders: ['Content-Type', 'Authorization'] // Allow only specific headers
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -55,11 +59,26 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
+// Test endpoint to check OpenAI configuration
+app.get('/api/test', (req, res) => {
+  const openaiConfigured = !!openai;
+  const apiKey = process.env.OPENAI_API_KEY ? 'Configured' : 'Missing';
+  
+  res.status(200).json({
+    status: 'ok',
+    message: 'Test endpoint',
+    openaiConfigured,
+    apiKey: apiKey,
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
   try {
     // Check if OpenAI client is initialized
     if (!openai) {
+      console.error('OpenAI client is not initialized. API key may be missing.');
       return res.status(503).json({ 
         error: 'OpenAI service unavailable. Please check server configuration.' 
       });
@@ -87,19 +106,33 @@ app.post('/api/chat', async (req, res) => {
     
     console.log('Sending to OpenAI:', JSON.stringify(apiMessages));
     
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: apiMessages,
-      temperature: 0.7,
-      max_tokens: 1000,
-    });
-    
-    console.log('Received response from OpenAI');
-    
-    res.json({ 
-      reply: completion.choices[0].message.content,
-      usage: completion.usage
-    });
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: apiMessages,
+        temperature: 0.7,
+        max_tokens: 1000,
+      });
+      
+      console.log('Received response from OpenAI');
+      
+      res.json({ 
+        reply: completion.choices[0].message.content,
+        usage: completion.usage
+      });
+    } catch (openaiError) {
+      console.error('OpenAI API Error:', openaiError);
+      console.error('OpenAI API Error Details:', JSON.stringify(openaiError, null, 2));
+      
+      // Check for specific OpenAI error types
+      if (openaiError.status === 401) {
+        return res.status(500).json({ error: 'Invalid API key or authentication error' });
+      } else if (openaiError.status === 429) {
+        return res.status(500).json({ error: 'Rate limit exceeded or quota reached' });
+      } else {
+        return res.status(500).json({ error: `OpenAI API error: ${openaiError.message}` });
+      }
+    }
   } catch (error) {
     console.error('Error calling OpenAI:', error);
     res.status(500).json({ error: 'Failed to get response from AI' });
