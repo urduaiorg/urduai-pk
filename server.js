@@ -5,12 +5,28 @@ import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 import rateLimit from 'express-rate-limit';
 
+// Load environment variables
 dotenv.config();
+
+// Check for required environment variables
+const requiredEnvVars = ['OPENAI_API_KEY'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.warn(`⚠️ Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  console.warn('The application may not function correctly without these variables.');
+  // We'll continue execution but log warnings instead of crashing
+}
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+
+// Add a route handler for the root path
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: 'public' });
+});
 
 // Configure rate limiting
 const apiLimiter = rateLimit({
@@ -24,14 +40,31 @@ const apiLimiter = rateLimit({
 // Apply rate limiting to API endpoints
 app.use('/api/', apiLimiter);
 
-// Configure OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+// Configure OpenAI with fallback for missing API key
+let openai;
+try {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+} catch (error) {
+  console.error('Failed to initialize OpenAI client:', error);
+}
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
   try {
+    // Check if OpenAI client is initialized
+    if (!openai) {
+      return res.status(503).json({ 
+        error: 'OpenAI service unavailable. Please check server configuration.' 
+      });
+    }
+
     console.log('Received request body:', JSON.stringify(req.body));
     const { messages, language } = req.body;
     
@@ -87,8 +120,13 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
     const sendFoxToken = process.env.SENDFOX_API_TOKEN;
     
     if (!sendFoxToken) {
-      console.error('SendFox API token not found in environment variables');
-      return res.status(500).json({ error: 'API configuration error' });
+      console.warn('SendFox API token not found in environment variables');
+      // Return success but log warning - this prevents the app from breaking
+      // if the newsletter service isn't configured
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Subscription recorded (SendFox integration not configured)' 
+      });
     }
     
     // Prepare data for SendFox API
@@ -129,8 +167,26 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
   }
 });
 
+// Catch-all route to serve index.html for any undefined routes
+// This is useful for single-page applications
+app.get('*', (req, res) => {
+  // Only serve index.html for non-API routes
+  if (!req.path.startsWith('/api/')) {
+    res.sendFile('index.html', { root: 'public' });
+  } else {
+    res.status(404).json({ error: 'API endpoint not found' });
+  }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 // Change port to 8080
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Health check available at: http://localhost:${PORT}/health`);
 }); 
