@@ -276,21 +276,22 @@
                 diagnosticResult.textContent = 'Testing API connection...';
                 
                 try {
-                    const origin = window.location.origin;
-                    const response = await fetch(`${origin}/api/test-openai`);
+                    // Use relative path exactly as in minimal-chat.html
+                    const response = await fetch('/api/test-openai');
                     
                     if (!response.ok) {
                         throw new Error(`Server responded with status: ${response.status}`);
                     }
                     
                     const data = await response.json();
+                    console.log('API test response data:', data);
                     
                     if (data.status === 'ok') {
-                        diagnosticResult.textContent = 'API connection successful! ' + data.message;
+                        diagnosticResult.textContent = 'API connection successful! ' + data.message + '\n\nResponse: ' + data.response;
                         diagnosticResult.style.backgroundColor = '#e8f5e9';
                         diagnosticResult.style.borderColor = '#66bb6a';
                     } else {
-                        diagnosticResult.textContent = 'API connection failed: ' + data.message;
+                        diagnosticResult.textContent = 'API test failed: ' + (data.error || 'Unknown error') + '\n\nDetails: ' + JSON.stringify(data, null, 2);
                         diagnosticResult.style.backgroundColor = '#ffebee';
                         diagnosticResult.style.borderColor = '#ef9a9a';
                     }
@@ -308,14 +309,15 @@
                 diagnosticResult.textContent = 'Testing configuration...';
                 
                 try {
-                    const origin = window.location.origin;
-                    const response = await fetch(`${origin}/api/config/test`);
+                    // Use relative path exactly as in minimal-chat.html
+                    const response = await fetch('/api/test');
                     
                     if (!response.ok) {
                         throw new Error(`Server responded with status: ${response.status}`);
                     }
                     
                     const data = await response.json();
+                    console.log('Config test response data:', data);
                     
                     const configMessage = `
 API Key: ${data.apiKey}
@@ -346,21 +348,22 @@ Environment: ${data.environment}
                 diagnosticResult.textContent = 'Testing direct fetch to OpenAI...';
                 
                 try {
-                    const origin = window.location.origin;
-                    const response = await fetch(`${origin}/api/test-openai-fetch`);
+                    // Use relative path exactly as in minimal-chat.html
+                    const response = await fetch('/api/test-openai-fetch');
                     
                     if (!response.ok) {
                         throw new Error(`Server responded with status: ${response.status}`);
                     }
                     
                     const data = await response.json();
+                    console.log('Direct fetch response data:', data);
                     
                     if (data.status === 'ok') {
                         diagnosticResult.textContent = 'Direct fetch successful! ' + data.message + '\n\nResponse: ' + data.response;
                         diagnosticResult.style.backgroundColor = '#e8f5e9';
                         diagnosticResult.style.borderColor = '#66bb6a';
                     } else {
-                        diagnosticResult.textContent = 'Direct fetch failed: ' + data.message;
+                        diagnosticResult.textContent = 'Direct fetch failed: ' + (data.error || 'Unknown error');
                         diagnosticResult.style.backgroundColor = '#ffebee';
                         diagnosticResult.style.borderColor = '#ef9a9a';
                     }

@@ -268,11 +268,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
             
-            // Get the current origin - this is critical for making the API call work correctly
-            const origin = window.location.origin;
-            console.log('Using origin for API call:', origin);
+            // Use relative path exactly as in minimal-chat.html
+            console.log('Using relative path for API call');
             
-            const response = await fetch(`${origin}/api/chat`, {
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
