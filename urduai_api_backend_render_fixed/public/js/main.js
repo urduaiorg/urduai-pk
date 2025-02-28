@@ -234,13 +234,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('No internet connection');
             }
             
+            // Set system message based on language
+            const systemMessage = currentLanguage === 'ur' 
+                ? "آپ ایک مددگار اور دوستانہ اے آئی اسسٹنٹ ہیں جو اردو میں بات کرتا ہے۔ آپ کا نام اُردو اے آئی ہے۔"
+                : "You are a helpful and friendly AI assistant that speaks English. Your name is Urdu AI.";
+            
+            // Add system message to the beginning of the messages array
+            const messagesWithSystem = [
+                { role: "system", content: systemMessage },
+                ...conversationHistory
+            ];
+            
             // Call your backend API
             const requestData = { 
-                messages: conversationHistory,
+                messages: messagesWithSystem,
                 language: currentLanguage
             };
             
-            console.log('Sending request to API:', JSON.stringify(requestData));
+            console.log('Sending request to API:', JSON.stringify({
+                messageCount: requestData.messages.length,
+                language: requestData.language
+            }));
             
             // Set up timeout for the fetch request
             const controller = new AbortController();
@@ -261,8 +275,11 @@ document.addEventListener('DOMContentLoaded', function() {
             clearTimeout(timeoutId);
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Server error');
+                console.error('Server error response:', response);
+                const errorData = await response.json().catch(e => ({ error: 'Unknown error' }));
+                console.error('Error data:', errorData);
+                
+                throw new Error(errorData.error || `Server error: ${response.status} ${response.statusText}`);
             }
             
             const data = await response.json();
@@ -271,18 +288,22 @@ document.addEventListener('DOMContentLoaded', function() {
             // Remove typing indicator
             removeTypingIndicator();
             
-            // Add AI response to the chat
-            addMessage(data.reply, 'ai');
+            // Add AI response to the chat - support both response formats
+            const aiMessage = data.message || data.reply || 'No response received';
+            addMessage(aiMessage, 'ai');
             
             // Add to conversation history
-            conversationHistory.push({ role: "assistant", content: data.reply });
-            console.log('Conversation history after adding AI response:', JSON.stringify(conversationHistory));
+            conversationHistory.push({ role: "assistant", content: aiMessage });
+            console.log('Conversation history after adding AI response:', JSON.stringify({
+                messageCount: conversationHistory.length
+            }));
             
             // Save conversation to localStorage
             saveConversation();
             
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error sending message:', error);
+            console.error('Error stack:', error.stack);
             removeTypingIndicator();
             
             // Show appropriate error message based on the error
@@ -295,10 +316,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 errorMessage = currentLanguage === 'ur' ? 
                     'انٹرنیٹ کنکشن نہیں ہے۔ براہ کرم اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔' : 
                     'No internet connection. Please check your connection and try again.';
+            } else if (error.message.includes('API key')) {
+                errorMessage = currentLanguage === 'ur' ? 
+                    'اے پی آئی کی ترتیب میں مسئلہ ہے۔ براہ کرم منتظم سے رابطہ کریں۔' : 
+                    'There is an issue with the API configuration. Please contact the administrator.';
             } else {
                 errorMessage = currentLanguage === 'ur' ? 
-                    'کچھ غلط ہو گیا ہے۔ براہ کرم دوبارہ کوشش کریں۔' : 
-                    'Something went wrong. Please try again.';
+                    'کچھ غلط ہو گیا ہے۔ براہ کرم دوبارہ کوشش کریں۔ خرابی: ' + error.message : 
+                    'Something went wrong. Please try again. Error: ' + error.message;
             }
             
             addMessage(errorMessage, 'error');
