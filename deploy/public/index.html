@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="اُردو اے آئی - اردو زبان کا پہلا اے آئی چیٹ باٹ">
+    <title>اُردو اے آئی</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+    <div class="app-container" role="application">
+        <!-- Sidebar -->
+        <aside class="sidebar" role="complementary" aria-label="سائڈبار">
+            <div class="sidebar-header">
+                <button class="hide-toggle-btn" title="Collapse Sidebar" aria-label="سائڈبار کو چھپائیں">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </button>
+                <button class="new-chat-btn" aria-label="نیا چیٹ شروع کریں">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    <span>نیا چیٹ</span>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Chat History -->
+                <div class="chat-history">
+                    <h3 class="history-title">گفتگو کی تاریخ</h3>
+                    <ul class="chat-list">
+                        <li class="chat-item active">
+                            <i class="fas fa-comment"></i>
+                            <span>نئی گفتگو</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Feature Showcase -->
+                <div class="feature-showcase">
+                    <h3 class="showcase-title">اُردو اے آئی کی خصوصیات</h3>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <i class="fas fa-language"></i>
+                            <span>اردو اور انگریزی میں بات چیت</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-brain"></i>
+                            <span>مصنوعی ذہانت پر مبنی جوابات</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-book"></i>
+                            <span>اردو ادب اور ثقافت کی معلومات</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>تعلیمی مدد اور معلومات</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Login Prompt -->
+                <div class="login-prompt">
+                    <h3>اُردو اے آئی</h3>
+                    <p>کسی بھی موضوع پر سوال پوچھیں، معلومات حاصل کریں، یا مدد طلب کریں</p>
+                    <div class="about-urduai">
+                        <p>یہ چیٹ باٹ Urdu Ai کی طرف سے بنایا گیا ہے۔ جس کا مقصد عام دوستوں کو یہ بتانا ہے کہ اب اے آئی نے کس قدر آسانی کردی ہے۔ یہ ساری ڈولپمنٹ ایک آرٹ سٹوڈنٹ نے کی ہے۔ جس کے پاس کمپیوٹر کی جددید تعلیم نہیں</p>
+                        <p class="mission-statement">urduai.org کا مقصد اے آئی کو آسان الفاظ میں عام لوگوں تک پہنچانا ہے۔</p>
+                        <a href="https://www.urduai.org" class="main-website-link" target="_blank" rel="noopener noreferrer">
+                            <div class="main-website-promo">
+                                <div class="promo-logo">
+                                    <span class="logo-text">اُردو</span>
+                                    <span class="logo-ai">اے آئی</span>
+                                </div>
+                                <div class="promo-content">
+                                    <h4>ہماری مکمل ویب سائٹ دیکھیں</h4>
+                                    <p>مزید خصوصیات، ٹیوٹوریلز اور اے آئی ٹولز کے لیے</p>
+                                    <span class="visit-site-btn">ویب سائٹ ملاحظہ کریں <i class="fas fa-external-link-alt"></i></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="social-links">
+                    <a href="https://www.facebook.com/urduaiorg" class="social-link" title="Facebook" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://twitter.com/urduaiorg" class="social-link" title="Twitter" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://www.instagram.com/urduaiorg" class="social-link" title="Instagram" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.youtube.com/channel/urduaiorg" class="social-link" title="YouTube" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+                
+                <div class="language-toggle">
+                    <button class="lang-btn active">اردو</button>
+                    <button class="lang-btn">English</button>
+                </div>
+                
+                <div class="theme-toggle">
+                    <button class="theme-btn" title="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" role="main">
+            <header class="main-header" role="banner">
+                <button class="mobile-menu-btn" title="Toggle Mobile Menu" aria-label="موبائل مینو دکھائیں/چھپائیں">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+                <div class="logo" aria-label="اُردو اے آئی لوگو">
+                    <span class="logo-text">اُردو</span>
+                    <span class="logo-ai">اے آئی</span>
+                </div>
+                <button class="sidebar-toggle-btn" title="Toggle Sidebar" aria-label="سائڈبار دکھائیں/چھپائیں">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </button>
+                <button class="show-sidebar-btn" title="Expand Sidebar" aria-label="سائڈبار کو پھیلائیں">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+            </header>
+
+            <div class="chat-container">
+                <div class="welcome-screen" id="welcome-screen">
+                    <div class="welcome-logo">
+                        <div class="logo large-logo">
+                            <span class="logo-text">اُردو</span>
+                            <span class="logo-ai">اے آئی</span>
+                        </div>
+                    </div>
+                    <h1 class="welcome-title">اُردو زبان کا پہلا اے آئی چیٹ باٹ</h1>
+                    <p class="welcome-subtitle">علم، ادب، ثقافت، سائنس اور دیگر موضوعات پر اردو میں گفتگو کریں</p>
+                    
+                    <div class="example-prompts">
+                        <div class="prompt-card">
+                            <h3>مصنوعی ذہانت</h3>
+                            <button class="prompt-btn">مصنوعی ذہانت کیا ہے اور یہ کیسے کام کرتی ہے؟</button>
+                            <button class="prompt-btn">چیٹ جی پی ٹی اور اردو اے آئی میں کیا فرق ہے؟</button>
+                        </div>
+                        <div class="prompt-card">
+                            <h3>ذاتی ترقی</h3>
+                            <button class="prompt-btn">اردو میں مؤثر مطالعہ کے طریقے کیا ہیں؟</button>
+                            <button class="prompt-btn">کامیاب لوگوں کی عادات کے بارے میں بتائیں</button>
+                        </div>
+                        <div class="prompt-card">
+                            <h3>عمومی معلومات</h3>
+                            <button class="prompt-btn">پاکستان کی مشہور شخصیات کون ہیں؟</button>
+                            <button class="prompt-btn">اردو زبان کی تاریخ کیا ہے؟</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages will be added here dynamically -->
+                </div>
+                
+                <div class="chat-input-wrapper">
+                    <form id="chat-form" aria-label="چیٹ فارم">
+                        <div class="chat-input-container">
+                            <textarea 
+                                id="chat-input" 
+                                placeholder="...اپنا سوال پوچھیں" 
+                                rows="1"
+                                aria-label="اپنا سوال یہاں لکھیں"
+                            ></textarea>
+                            <button type="submit" class="send-btn" id="send-button" title="Send Message" aria-label="پیغام بھیجیں">
+                                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <p class="disclaimer" role="note">اُردو اے آئی کے ذریعے دی گئی معلومات میں غلطیاں ہو سکتی ہیں۔ اہم فیصلوں کے لیے تصدیق کریں۔</p>
+                </div>
+            </div>
+            
+            <!-- Newsletter Signup -->
+            <div class="newsletter-container">
+                <div class="newsletter-content">
+                    <h2>اے آئی کے متعلق تازہ خبروں سے باخبر رہیں اور آسان الفاظ میں مصنوعی ذہانت کو جانیئے۔</h2>
+                    <p class="newsletter-description">ہمارے نیوز لیٹر کو جوائن کریں اور سوشل میڈیا پر فالو کریں</p>
+                    <form id="newsletter-form" class="newsletter-form" aria-label="نیوز لیٹر سبسکرپشن فارم">
+                        <div class="form-group">
+                            <input type="text" id="name" name="name" placeholder="Your Name" aria-label="آپ کا نام" />
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" placeholder="Your Email" name="email" required aria-label="آپ کا ای میل" aria-required="true" />
+                        </div>
+                        <button type="submit" id="submit-button" title="Subscribe to Newsletter" aria-label="نیوز لیٹر سبسکرائب کریں">سبسکرائب کریں</button>
+                    </form>
+                    <div id="form-messages" role="status" aria-live="polite"></div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="main-footer" role="contentinfo">
+                <div class="footer-content">
+                    <p>Urdu AI is a Wang Lab of Innovation (WALI) initiative - <a href="https://www.walipak.com" target="_blank" rel="noopener noreferrer" aria-label="WALI website">www.walipak.com</a></p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="success-modal" role="dialog" aria-labelledby="success-modal-title" aria-hidden="true">
+        <div class="modal-content newsletter-success">
+            <span class="close-modal" id="close-modal" aria-label="بند کریں">&times;</span>
+            <div class="success-icon">
+                <div class="emoji-container">
+                    <i class="fas fa-check-circle main-emoji" aria-hidden="true"></i>
+                    <span class="floating-emoji" aria-hidden="true">✨</span>
+                    <span class="floating-emoji" aria-hidden="true">🎉</span>
+                    <span class="floating-emoji" aria-hidden="true">👍</span>
+                    <span class="floating-emoji" aria-hidden="true">🌟</span>
+                </div>
+            </div>
+            <h3 id="success-modal-title">شکریہ!</h3>
+            <p>آپ کی سبسکرپشن کامیابی سے رجسٹر ہو گئی ہے۔</p>
+        </div>
+    </div>
+
+    <!-- Login Modal (Placeholder) -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content login-modal-content">
+            <span class="close-modal close-login-modal">&times;</span>
+            <h3>آپ کی رائے</h3>
+            <p>اُردو اے آئی کو بہتر بنانے کے لیے آپ کی رائے اہم ہے۔ ہمیں بتائیں کہ آپ کو کیا پسند آیا اور کیا بہتر ہو سکتا ہے۔</p>
+            <div class="feedback-form">
+                <textarea placeholder="اپنی رائے یہاں لکھیں..." rows="4"></textarea>
+                <button class="send-feedback-btn">رائے بھیجیں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <script src="js/main.js"></script>
+</body>
+</html> 

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        input {
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple API Test</h1>
+    
+    <div>
+        <input type="text" id="message" placeholder="Type your message..." value="Hello, how are you?">
+        <button id="test-en">Test English</button>
+        <button id="test-ur">Test Urdu</button>
+    </div>
+    
+    <h2>Request:</h2>
+    <pre id="request"></pre>
+    
+    <h2>Response:</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        document.getElementById('test-en').addEventListener('click', () => testAPI('en'));
+        document.getElementById('test-ur').addEventListener('click', () => testAPI('ur'));
+        
+        async function testAPI(language) {
+            const message = document.getElementById('message').value.trim();
+            if (!message) return;
+            
+            const requestData = {
+                messages: [{ role: 'user', content: message }],
+                language: language
+            };
+            
+            document.getElementById('request').textContent = JSON.stringify(requestData, null, 2);
+            document.getElementById('response').textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+                
+                const data = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('response').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html> 

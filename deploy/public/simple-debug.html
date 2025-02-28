@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #response {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug API</h1>
+    
+    <div>
+        <button id="testEnglish">Test English</button>
+        <button id="testUrdu">Test Urdu</button>
+    </div>
+    
+    <div id="response">Response will appear here...</div>
+    
+    <script>
+        document.getElementById('testEnglish').addEventListener('click', () => testAPI('Hello, how are you?', 'en'));
+        document.getElementById('testUrdu').addEventListener('click', () => testAPI('آپ کیسے ہیں؟', 'ur'));
+        
+        async function testAPI(message, language) {
+            const responseElement = document.getElementById('response');
+            responseElement.textContent = 'Sending request...';
+            
+            try {
+                console.log(`Testing API with message: "${message}" in ${language}`);
+                
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        messages: [{ role: "user", content: message }],
+                        language: language 
+                    }),
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status: ${response.status}`);
+                }
+                
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                try {
+                    const data = JSON.parse(responseText);
+                    console.log('Parsed data:', data);
+                    
+                    responseElement.textContent = `Status: ${response.status}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+                    
+                    if (data && data.reply) {
+                        console.log('Reply:', data.reply);
+                    } else {
+                        console.error('No reply in response');
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing JSON:', parseError);
+                    responseElement.textContent = `Error parsing JSON: ${parseError.message}\n\nRaw response:\n${responseText}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                responseElement.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html> 
